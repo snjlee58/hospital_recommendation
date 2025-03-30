@@ -15,41 +15,34 @@ def extract_items_from_response(response: dict) -> pd.DataFrame:
     except KeyError:
         raise ValueError("Invalid response structure. Could not find items.")
 
-
-def clean_hospital_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+def clean_dataframe(
+    df: pd.DataFrame,
+    column_mapping: dict = None,
+    drop_columns: list = None,
+    convert_float_cols: list = None,
+    fillna_text_cols: list = None
+) -> pd.DataFrame:
     """
-    Cleans and renames hospital data columns to match database schema.
+    Generalized cleaner function for DataFrames:
+    - Renames columns using `column_mapping`
+    - Drops columns in `drop_columns`
+    - Converts specified columns to float
+    - Fills NaNs in text columns with ""
     """
-    column_mapping = {
-        "ykiho": "id",
-        "yadmNm": "name",
-        "clCd": "type_code",
-        "clCdNm": "type_name",
-        "sidoCd": "city_code",
-        "sidoCdNm": "city_name",
-        "sgguCd": "district_code",
-        "sgguCdNm": "district",
-        "emdongNm": "town",
-        "addr": "address",
-        "telno": "tel",
-        "hospUrl": "url",
-        "YPos": "lat",
-        "XPos": "lon",
-    }
+    if drop_columns:
+        df = df.drop(columns=[col for col in drop_columns if col in df.columns], errors="ignore")
 
-    # Drop unnecessary columns
-    df = df.drop(columns=["estbDd", "drTotCnt", "mdeptGdrCnt", "mdeptIntnCnt", "mdeptResdntCnt", "mdeptSdrCnt", "detyGdrCnt", "detyIntnCnt", "detyResdntCnt", "detySdrCnt", "cmdcGdrCnt", "cmdcIntnCnt", "cmdcResdntCnt", "cmdcSdrCnt", "pnursCnt"])
+    if column_mapping:
+        df = df.rename(columns=column_mapping)
 
-    df = df.rename(columns=column_mapping)
+    if convert_float_cols:
+        for col in convert_float_cols:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    # Ensure float for coordinates
-    for col in ["lat", "lon"]:
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
-
-    # Fill NA with empty string for text fields
-    for col in ["name", "address", "tel"]:
-        if col in df.columns:
-            df[col] = df[col].fillna("")
+    if fillna_text_cols:
+        for col in fillna_text_cols:
+            if col in df.columns:
+                df[col] = df[col].fillna("")
 
     return df
