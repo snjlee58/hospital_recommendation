@@ -1,0 +1,55 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env/
+.envrc
+*.env
+.Python
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# Cache
+.cache/
+*.cache
+*.tmp
+
+# Pytest / test artifacts
+htmlcov/
+.tox/
+.coverage
+coverage.xml
+
+# Secret files (make sure to keep your API keys secret)
+api_keys.json
+secrets.yaml
+config.local.py
+
+# Exported data files
+*.csv
+*.tsv
+*.xlsx
+*.db
+*.sqlite3
+*.json
+
+# Mac/Linux system junk
+*.swp
+*~
