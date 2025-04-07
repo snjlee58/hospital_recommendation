@@ -1,7 +1,8 @@
 import requests
 
 # --- Configuration ---
-SERVICE_KEY = "ejSxZH1i9X9Btaga5Oom/AZiuOcUNR2v9FgYwhDM3gaerP1EZGAlxYqFpS4fYMCKq4SIbfRZJvi45+e8LjEZzw==" # Decoding 
+# SERVICE_KEY = "ejSxZH1i9X9Btaga5Oom/AZiuOcUNR2v9FgYwhDM3gaerP1EZGAlxYqFpS4fYMCKq4SIbfRZJvi45+e8LjEZzw==" # Decoding 
+SERVICE_KEY = "GTDvWSPwxWuonrDpSoJFdpfsGL10NYvxqG3hCEwNTdMp39xqNkgVUXR7+ywZsErmVoAtkLW18guG1SgF6Dcnaw=="
 
 # --- Helper Function to Make API Call ---
 def call_api(base_url: str, endpoint: str, params: dict, return_json=True):

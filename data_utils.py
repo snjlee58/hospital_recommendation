@@ -44,5 +44,7 @@ def clean_dataframe(
         for col in fillna_text_cols:
             if col in df.columns:
                 df[col] = df[col].fillna("")
-
+    
+    df = df.fillna(value=pd.NA)
+    
     return df
