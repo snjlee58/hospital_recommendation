@@ -4,6 +4,7 @@ from data_utils import extract_items_from_response, clean_dataframe
 import pandas as pd
 from db_utils import upload_dataframe
 from naver_api import search_naver_blog
+from naver_blog_crawler import get_blog_post_content, close_driver
 
 # Function to check API parameters
 def get_api_data(service_enum, endpoint_key, user_params):
@@ -20,7 +21,7 @@ base_url = API_BASE_URLS[service]
 
 params = {
     "pageNo": 1,
-    "numOfRows": 50,
+    "numOfRows": 5,
     "_type": "json"
 }
 
@@ -66,7 +67,7 @@ for id in df_clean["id"]:
         detail_response = call_api(base_url=API_BASE_URLS[ApiService.HOSP_DETAIL], endpoint=API_ENDPOINTS[ApiService.HOSP_DETAIL]["SPECIALIST_COUNT_BY_DEPARTMENT"], params={
             "ykiho": id,
             "pageNo": 1,
-            "numOfRows": 100,
+            "numOfRows": 10,
             "_type": "json"
         })
         print(f"Detail response for {id}: {detail_response}")
@@ -146,9 +147,15 @@ for name in df_clean["name"]:
         print("📝 Title:", post["title"])
         print("🔗 Link:", post["link"])
         print("📄 Desc:", post["description"])
+
+        content = get_blog_post_content(post["link"])
+        if content:
+            print("📝 Content Preview:", content[:200], "...")  # Print first 200 characters for preview
+        else:
+            print("📝 No content found.")
         print("-" * 60)
 
-    print("=" * 80)
+close_driver()
 
 
 # Combine and deduplicate department codes
