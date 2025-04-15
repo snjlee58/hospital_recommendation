@@ -77,6 +77,26 @@ df_clean = clean_dataframe(combined_df, column_mapping=column_mapping, drop_colu
 
 # print(df_clean.head(20))
 
+#Extract unique city, district, hospital_type records
+city_df = df_clean[['city_code', 'city_name']].drop_duplicates().reset_index(drop=True)
+district_df = df_clean[['district_code', 'district_name']].drop_duplicates().reset_index(drop=True)
+hospital_type_df = df_clean[['type_code', 'type_name']].drop_duplicates().reset_index(drop=True)
+
+# Rename columns to match database schema
+city_df.rename(columns={"city_code": "code", "city_name": "name"}, inplace=True) 
+district_df.rename(columns={"district_code": "code", "district_name": "name"}, inplace=True) 
+hospital_type_df.rename(columns={"type_code": "code", "type_name": "name"}, inplace=True)
+
+# Remove the name columns from the hospital dataframe
+hospitals_df = df_clean.drop(columns=["city_name", "district_name", "type_name"])
+
+# Upload cleaned city, district, hospital_type hospital metadata
+upload_dataframe(city_df, table_name="city") 
+upload_dataframe(district_df, table_name="district") 
+upload_dataframe(hospital_type_df, table_name="hospital_type") 
+upload_dataframe(df_clean, table_name="hospitals")
+
+
 # ---- Step 3: For each hospital, get hospital detail info by id and attach to table
 department_master = []       # Will collect all department codes + names
 hospital_dept_records = []   # Will collect each hospital's dept + count info
@@ -191,8 +211,6 @@ hospital_grade_records = [] # To collect each hospital's grade info
 # combined_grades_df = pd.concat(hospital_grade_records).reset_index(drop=True) 
 
 # ---- Step 4: Upload data to database
-# # Upload cleaned hospital metadata
-upload_dataframe(df_clean, table_name="hospitals")
 # # Upload department codes
 # upload_dataframe(departments_df, table_name="departments")
 # # Upload hospital-department relations
