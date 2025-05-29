@@ -1,23 +1,28 @@
-import requests
-from flask import Flask, request, jsonify, render_template_string
 import os
+import re
+import json
+import requests
+from flask import Flask, request, render_template_string
 from dotenv import load_dotenv
 from system_prompt import SYSTEM_PROMPT
+from hospital_search import search_hospitals, load_database_url, create_db_engine
 
 # Load environment variables
 load_dotenv()
 API_KEY = os.getenv("OPENAI_API_KEY")
 MODEL = "gpt-4o-mini"
 
+db_url = load_database_url()
+db_engine = create_db_engine(db_url)
+
 headers = {
     "Authorization": f"Bearer {API_KEY}",
     "Content-Type": "application/json"
 }
 
-# Initialize message history
-messages = [SYSTEM_PROMPT]
-
+# Initialize Flask app and message history
 app = Flask(__name__)
+messages = [SYSTEM_PROMPT]
 
 HTML_TEMPLATE = '''
 <!DOCTYPE html>
@@ -92,23 +97,51 @@ HTML_TEMPLATE = '''
 </html>
 '''
 
+def call_openai_api(user_input):
+    """Send user input to OpenAI and return the assistant reply."""
+    messages.append({"role": "user", "content": user_input})
+    data = {"model": MODEL, "messages": messages}
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=data)
+    response_json = response.json()
+    reply = response_json["choices"][0]["message"]["content"].strip()
+    messages.append({"role": "assistant", "content": reply})
+    return reply
+
+def extract_json_from_reply(reply):
+    """Try to extract JSON object from LLM reply."""
+    match = re.search(r"\{.*\}", reply, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group(0))
+        except json.JSONDecodeError:
+            return None
+    return None
+
+def format_hospital_results(hospitals):
+    """Convert hospital rows to HTML formatted string, excluding null URLs."""
+    return "<br>\n".join([
+        f"<b>{h['name']}</b><br>{h['address']}<br>☎ {h['tel']}" +
+        (f"<br><a href='{h['url']}' target='_blank'>{h['url']}</a>" if h.get('url') else '') +
+        "<hr>"
+        for h in hospitals
+    ])
+
 @app.route("/", methods=["GET", "POST"])
 def chat():
     reply = ""
     if request.method == "POST":
         user_input = request.form["user_input"]
-        messages.append({"role": "user", "content": user_input})
+        reply = call_openai_api(user_input)
+        data = extract_json_from_reply(reply)
 
-        data = {
-            "model": MODEL,
-            "messages": messages
-        }
-
-        response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=data)
-        response_json = response.json()
-        reply = response_json["choices"][0]["message"]["content"].strip()
-
-        messages.append({"role": "assistant", "content": reply})
+        if data:
+            city = data.get("city")
+            district = data.get("district")
+            hospital_type = data.get("hospital_type")
+            department = data.get("department_name")
+            hospitals = search_hospitals(city, district, hospital_type, department, db_engine)
+            result_text = format_hospital_results(hospitals)
+            return render_template_string(HTML_TEMPLATE, response=result_text)
 
     return render_template_string(HTML_TEMPLATE, response=reply)
 
