@@ -1,8 +1,10 @@
 import requests
+from requests.exceptions import Timeout, HTTPError, RequestException
 
 # --- Configuration ---
-# SERVICE_KEY = "ejSxZH1i9X9Btaga5Oom/AZiuOcUNR2v9FgYwhDM3gaerP1EZGAlxYqFpS4fYMCKq4SIbfRZJvi45+e8LjEZzw==" # Decoding 
-SERVICE_KEY = "GTDvWSPwxWuonrDpSoJFdpfsGL10NYvxqG3hCEwNTdMp39xqNkgVUXR7+ywZsErmVoAtkLW18guG1SgF6Dcnaw=="
+
+SERVICE_KEY = "GTDvWSPwxWuonrDpSoJFdpfsGL10NYvxqG3hCEwNTdMp39xqNkgVUXR7+ywZsErmVoAtkLW18guG1SgF6Dcnaw==" # old
+# SERVICE_KEY = "Fbq4OmxpKYD/RUVgN0+nZgm02P3BojouPbc4z3JApBzD39BllVOYadxrCb8evD0XHNbQUSSt8nwZanr5Vw7qDQ==" # new
 
 # --- Helper Function to Make API Call ---
 def call_api(base_url: str, endpoint: str, params: dict, return_json=True):
@@ -15,13 +17,23 @@ def call_api(base_url: str, endpoint: str, params: dict, return_json=True):
     :param return_json: Whether to parse response as JSON
     :return: Parsed response or raw text
     """
+    timeout = 60 # seconds
+    try:
+        url = f"{base_url}{endpoint}"
+        params["ServiceKey"] = SERVICE_KEY
+        params["_type"] = "json"
 
-    url = f"{base_url}{endpoint}"
-    params["ServiceKey"] = SERVICE_KEY
-    params["_type"] = "json"
-
-    response = requests.get(url, params=params)
-    if response.status_code == 200:
+        response = requests.get(url, params=params, timeout=timeout)
+        response.raise_for_status()
         return response.json() if return_json else response.text
-    else:
-        raise Exception(f"API request failed: {response.status_code} - {response.text}")
+    except Timeout:
+        # caller can catch this specifically if desired
+        raise RuntimeError(f"Timeout ({timeout}s) calling {url}")
+    except HTTPError as he:
+        # 4xx, 5xx responses
+        status = he.response.status_code if he.response else "?"
+        text   = he.response.text       if he.response else ""
+        raise RuntimeError(f"HTTP {status} calling {url}: {text}") from he
+    except RequestException as re:
+        # includes ConnectionError, TooManyRedirects, etc.
+        raise RuntimeError(f"Request failed calling {url}: {re}") from re

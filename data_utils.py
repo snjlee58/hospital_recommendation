@@ -20,7 +20,8 @@ def clean_dataframe(
     column_mapping: dict = None,
     drop_columns: list = None,
     convert_float_cols: list = None,
-    fillna_text_cols: list = None
+    fillna_text_cols: list = None,
+    convert_bool_cols: list = None
 ) -> pd.DataFrame:
     """
     Generalized cleaner function for DataFrames:
@@ -44,6 +45,11 @@ def clean_dataframe(
         for col in fillna_text_cols:
             if col in df.columns:
                 df[col] = df[col].fillna("")
+
+    if convert_bool_cols:
+        for col in convert_bool_cols:
+            if col in df.columns:
+                df[col] = df[col].map({"Y": True, "N": False}).fillna("")
     
     df = df.fillna(value=pd.NA)
     

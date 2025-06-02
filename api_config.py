@@ -16,7 +16,9 @@ API_ENDPOINTS = {
         "LIST": "/getHospBasisList", # 병원기본목록 
     },
     ApiService.HOSP_DETAIL: {
-        "SPECIALIST_COUNT_BY_DEPARTMENT": "/getSpcSbjtSdrInfo2.7" # 전문과목별 전문의 수
+        "SPECIALIST_COUNT_BY_DEPARTMENT": "/getSpcSbjtSdrInfo2.7", # 전문과목별 전문의 수
+        "EQUIPMENT_INFO": "/getMedOftInfo2.7", # 의료장비정보
+        "OPERATING_HOURS": "/getDtlInfo2.7" # 운영시간
     },
     ApiService.HOSP_GRADES: {
         "GRADES": "/getHospAsmInfo1" # 병원평가상세등급조회
@@ -34,6 +36,17 @@ API_PARAMS = {
         "required": ["ykiho"],
         "optional": ["pageNo", "numOfRows", "_type"]
     },
+
+    "/getMedOftInfo2.7": {
+        "required": ["ykiho"],
+        "optional": ["pageNo", "numOfRows", "_type"]
+    },
+
+    "/getDtlInfo2.7": {
+        "required": ["ykiho"],
+        "optional": ["pageNo", "numOfRows", "_type"]
+    },
+
     "/getHospAsmInfo1": {
         "required": ["serviceKey", "pageNo", "numOfRows"],
         "optional": [ "ykiho"]
