@@ -68,26 +68,6 @@ for id in ids[start_idx:]:
         print(f"❌ Unexpected error for {id}: {e}")
         continue
 
-# Get review information for each hospital using Naver Blog API
-# for name in df_clean["name"]:
-#     print(f"🔍 Searching reviews for: {name}") # DEBUG
-#     blog_posts = search_naver_blog(f"{name} 후기")
-
-#     for post in blog_posts:
-#         print("📝 Title:", post["title"])
-#         print("🔗 Link:", post["link"])
-#         print("📄 Desc:", post["description"])
-
-#         content = get_blog_post_content(post["link"])
-#         if content:
-#             print("📝 Content Preview:", content[:200], "...")  # Print first 200 characters for preview
-#         else:
-#             print("📝 No content found.")
-#         print("-" * 60)
-
-# close_driver()
-
-
 # # Combine and deduplicate department codes
 departments_df = pd.concat(department_master).drop_duplicates().reset_index(drop=True)
 

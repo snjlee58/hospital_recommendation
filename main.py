@@ -3,8 +3,6 @@ from api_config import ApiService, API_BASE_URLS, API_ENDPOINTS, API_PARAMS
 from data_utils import extract_items_from_response, clean_dataframe
 import pandas as pd
 from db_utils import upload_dataframe
-from naver_api import search_naver_blog
-from naver_blog_crawler import get_blog_post_content, close_driver
 
 # Function to check API parameters
 def get_api_data(service_enum, endpoint_key, user_params):

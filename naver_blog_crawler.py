@@ -8,6 +8,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from llm_utils import chunk_review_with_llm   # <— your LLM chunking function
 
+from db_utils import get_hospital_id_names
+from naver_api import search_naver_blog
+
 # Selenium WebDriver setup
 options = webdriver.ChromeOptions()
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -53,21 +56,53 @@ def get_blog_post_content(url):
         return None
 
 if __name__ == "__main__":
-    for url in links:
-        print("\n\n" + "#" * 80)
-        print(f"URL: {url}\n")
-        raw = get_blog_post_content(url)
-        if not raw:
-            print("⚠️  No content, skipping.")
+    id_names     = get_hospital_id_names()
+    start_idx    = 0
+    batch_size   = 1
+    request_count = 0
+
+    # Only iterate from start_idx up to batch_size items
+    for hosp_id, hosp_name in id_names[start_idx : start_idx + batch_size]:
+        request_count += 1
+        print(f"[{request_count}/{batch_size}] 🔍 Searching reviews for: {hosp_name} (ID={hosp_id})")
+
+        # 1) Search Naver Blog for that hospital name + '후기'
+        try:
+            blog_posts = search_naver_blog(f"{hosp_name} 후기")
+        except Exception as e:
+            print(f"⚠️  검색 API 오류: {e}")
             continue
 
-        print("📄 Raw review text:\n", raw[:500], "…\n")  # print first 500 chars
+        # 2) For each returned post
+        for post in blog_posts:
+            url = post["link"]
+            print("📝 Title:", post["title"])
+            print("🔗 Link:", url)
 
-        try:
-            chunks = chunk_review_with_llm(raw)
+            # 3) Crawl raw text
+            content = get_blog_post_content(url)
+            if not content:
+                print("⚠️  크롤링 실패, 건너뜀.")
+                continue
+
+            print("📄 Raw review text (first 200 chars):", content[:200], "…")
+
+            # 4) Chunk via LLM
+            try:
+                chunks = chunk_review_with_llm(content)
+            except Exception as e:
+                print(f"❌ Chunking failed: {e}")
+                continue
+
+            # 5) Show the chunk JSON
             print("🤖 LLM‐Chunked JSON:")
             print(json.dumps(chunks, ensure_ascii=False, indent=2))
-        except Exception as e:
-            print(f"❌ Chunking failed: {e}")
 
+            # (Here you could call your `ingest_review(...)` to embed & store)
+
+            # Be gentle with rate limits
+            time.sleep(0.1)
+
+    # Finally, close your Selenium driver
+    from naver_blog_crawler import driver
     driver.quit()
