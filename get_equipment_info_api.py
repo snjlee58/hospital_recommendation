@@ -14,9 +14,9 @@ equipments_master = []       # Will collect all unique equipment codes + names
 hospital_equipment_records = []   # Will collect each hospital's equipment + count info
 
 # Get detail information for each hospital using id
-start_idx = 31370
+start_idx = 45370
 request_count = 0
-batch_size = 5000
+batch_size = 1000
 for id in ids[start_idx:]:
     ## Log request count
     if request_count >= batch_size:
