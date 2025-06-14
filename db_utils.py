@@ -42,6 +42,28 @@ def get_hospital_id_names():
     # row is a Row object, so you can access by index or by key
     return [(row[0], row[1]) for row in rows]
 
+def get_hospital_id_names_fixed():
+    """
+    Returns a list of (hospital_id, hospital_name) tuples for 논현동,
+    ordered by hospital_id.
+    """
+    engine = get_engine()
+    with engine.connect() as conn:
+        rows = conn.execute(text("""
+            SELECT
+                id,
+                name
+            FROM hospitals
+            WHERE
+                district_code = '110001'
+                AND type_code     = '31'
+                AND town          = '논현동'
+            ORDER BY id
+        """)).fetchall()
+
+    # each row is (id, name)
+    return [(row[0], row[1]) for row in rows]
+
 def upload_dataframe_ignore_dups(
     df: pd.DataFrame,
     table_name: str,
