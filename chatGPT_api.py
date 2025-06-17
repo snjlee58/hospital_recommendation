@@ -86,8 +86,8 @@ HTML_TEMPLATE = """
     }
     .input-area button:hover { background:#494949; }
   </style>
-
 </head>
+
 <body>
   <h1 style="margin-top:2rem;">HosPT</h1>
   <div class="chat-container">
@@ -143,7 +143,11 @@ def format_hospital_results(hospitals):
 
 @app.route("/", methods=["GET", "POST"])
 def chat():
-    if request.method == "POST":
+    global messages
+    if request.method == "GET":
+        # start fresh on a plain page load
+        messages = [SYSTEM_PROMPT]
+    elif request.method == "POST":
         user_input = request.form["user_input"]
         # Show the user bubble
         messages.append({"role": "user", "content": user_input})
