@@ -24,87 +24,81 @@ headers = {
 app = Flask(__name__)
 messages = [SYSTEM_PROMPT]
 
-HTML_TEMPLATE = '''
+HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>🏥 Hospital Request Assistant</title>
-
-    <!-- Google Fonts Pretendard -->
     <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
-        body {
-            font-family: 'Pretendard', sans-serif;
-            background: linear-gradient(to bottom right, #f9fafb, #eef1f5);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        h1 {
-            font-weight: 700;
-            font-size: 2.5rem;
-            color: #333;
-        }
-        .card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            background: white;
-        }
-        .btn-primary {
-            background-color: #ff6f61;
-            border: none;
-            font-weight: bold;
-        }
-        .btn-primary:hover {
-            background-color: #ff8a75;
-        }
-        footer {
-            margin-top: auto;
-        }
-    </style>
+  <style>
+    body { font-family: 'Pretendard', sans-serif; background:white; display:flex; flex-direction:column; align-items:center; margin:0; height:100vh; }
+    .chat-container { width:100%; max-width:1000px; background:white; border-radius:8px; display:flex; flex-direction:column; height:82%; margin-top:1rem; }
+    .messages { flex:1; padding:1rem; overflow-y:auto; }
+    .message { max-width:70%; margin-bottom:.75rem; padding:.75rem 1rem; border-radius:16px; line-height:1.4; }
+    .message.user    { background: #f4f4f4; color:#0d0d0d; margin-left:auto; border-bottom-right-radius:4px; }
+    .message.assistant { background:white; color:#333; max-width:100%; margin-right:auto; border-bottom-left-radius:4px; }
+    .input-area { 
+        display:flex; 
+        align-items: flex-center;
+        border:1px solid #e1e4e8; 
+        border-radius: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        padding:1rem; 
+    }
+    .input-area input { 
+        flex:1; border:none; 
+        border-radius: 24px;
+    }
+    .input-area input:focus { 
+        outline:none; 
+    }
+    .input-area button { 
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        background:#000000; 
+        border:none; 
+        align-items:center;
+        justify-content:center;
+        color:white; 
+    }
+    .input-area button:hover { background:#ff8a75; }
+  </style>
+
 </head>
-
 <body>
-    <div class="container py-5">
-        <h1 class="mb-4 text-center">🏥 병원 추천 AI 서비스</h1>
-        <div class="card p-4 shadow-sm">
-            <form method="post" class="mb-3">
-                <div class="mb-3">
-                    <label class="form-label"><b>증상이나 병원 요청사항을 입력하세요</b></label>
-                    <input type="text" name="user_input" class="form-control rounded-3 p-2" placeholder="예) 왼쪽 팔이 저리고 두통이 있어. 강남구에 위치한 병원을 추천해줘." required>
-                </div>
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary btn-lg rounded-pill">제출하기</button>
-                </div>
-            </form>
-
-            <h5 class="mt-4"> <b>AI 답변</b></h5>
-            <div class="bg-light border rounded-4 p-4" style="min-height:180px; background-color: #fafafa;">
-                {{ response | safe }}
-            </div>
+  <h1 style="margin-top:2rem;">HosPT</h1>
+  <div class="chat-container">
+    <div class="messages" id="msgs">
+      {% for msg in messages %}
+        <div class="message {{ 'user' if msg.role=='user' else 'assistant' }}">
+          {{ msg.content|safe }}
         </div>
+      {% endfor %}
     </div>
-
-    <footer class="text-center py-4">
-        <small class="text-muted">© 2025 Hospital Recommendation AI</small>
-    </footer>
+    <form class="input-area" method="post">
+      <input name="user_input" placeholder="증상이나 요청사항을 입력하세요…" autocomplete="off" required>
+      <button type="submit">전송</button>
+    </form>
+  </div>
+  <script>
+    // scroll to bottom on load
+    const msgs = document.getElementById('msgs');
+    msgs.scrollTop = msgs.scrollHeight;
+  </script>
 </body>
 </html>
-'''
+"""
 
 def call_openai_api(user_input):
     """Send user input to OpenAI and return the assistant reply."""
-    messages.append({"role": "user", "content": user_input})
     data = {"model": MODEL, "messages": messages}
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=data)
     response_json = response.json()
     reply = response_json["choices"][0]["message"]["content"].strip()
-    messages.append({"role": "assistant", "content": reply})
     return reply
 
 def extract_json_from_reply(reply):
@@ -121,29 +115,39 @@ def format_hospital_results(hospitals):
     """Convert hospital rows to HTML formatted string, excluding null URLs."""
     return "<br>\n".join([
         f"<b>{h['name']}</b><br>{h['address']}<br>☎ {h['tel']}" +
-        (f"<br><a href='{h['url']}' target='_blank'>{h['url']}</a>" if h.get('url') else '') +
-        "<hr>"
+        (f"<br><a href='{h['url']}' target='_blank'>{h['url']}</a>" if h.get('url') else '')
+
         for h in hospitals
     ])
 
 @app.route("/", methods=["GET", "POST"])
 def chat():
-    reply = ""
     if request.method == "POST":
         user_input = request.form["user_input"]
+        # Show the user bubble
+        messages.append({"role": "user", "content": user_input})
+
+        # Call LLM + DB lookup
         reply = call_openai_api(user_input)
         data = extract_json_from_reply(reply)
 
         if data:
-            city = data.get("city")
-            district = data.get("district")
-            hospital_type = data.get("hospital_type")
-            department = data.get("department_name")
+            # you returned JSON: turn into HTML list or whatever
+            city, district, hospital_type, department = (
+              data.get("city"), 
+              data.get("district"),
+              data.get("hospital_type"), 
+              data.get("department_name")
+            )
             hospitals = search_hospitals(city, district, hospital_type, department, db_engine)
             result_text = format_hospital_results(hospitals)
-            return render_template_string(HTML_TEMPLATE, response=result_text)
+            messages.append({"role": "assistant", "content": result_text})
+        else:
+            # LLM asked a follow-up
+            messages.append({"role":"assistant","content": reply})
 
-    return render_template_string(HTML_TEMPLATE, response=reply)
+    # on both GET and POST, render the chat history
+    return render_template_string(HTML_TEMPLATE, messages=messages[1:]) # skip the system prompt
 
 if __name__ == "__main__":
     app.run(debug=True)
