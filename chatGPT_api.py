@@ -34,11 +34,30 @@ HTML_TEMPLATE = """
 
   <style>
     body { font-family: 'Pretendard', sans-serif; background:white; display:flex; flex-direction:column; align-items:center; margin:0; height:100vh; }
-    .chat-container { width:100%; max-width:1000px; background:white; border-radius:8px; display:flex; flex-direction:column; height:82%; margin-top:1rem; }
-    .messages { flex:1; padding:1rem; overflow-y:auto; }
-    .message { max-width:70%; margin-bottom:.75rem; padding:.75rem 1rem; border-radius:16px; line-height:1.4; }
-    .message.user    { background: #f4f4f4; color:#0d0d0d; margin-left:auto; border-bottom-right-radius:4px; }
-    .message.assistant { background:white; color:#333; max-width:100%; margin-right:auto; border-bottom-left-radius:4px; }
+    .chat-container { width:100%; max-width:900px; background:white; border-radius:8px; display:flex; flex-direction:column; height:82%; margin-top:1rem; }
+    .messages { 
+        display: flex;
+        flex-direction: column;
+        flex:1; 
+        padding:1rem; 
+        overflow-y:auto; 
+    }
+    .message { 
+        display: inline-block;
+        max-width:70%; 
+        margin-bottom:.75rem; 
+        padding:.75rem 1rem; 
+        border-radius:16px; 
+        line-height:1.4; 
+    }
+    .message.user { 
+        align-self: flex-end;
+        word-wrap: break-word;
+        background: #f4f4f4; 
+        color:#0d0d0d; 
+        margin-left:auto;
+    }
+    .message.assistant { background:white; color:#333; max-width:100%; margin-right:auto;}
     .input-area { 
         display:flex; 
         align-items: flex-center;
@@ -65,7 +84,7 @@ HTML_TEMPLATE = """
         justify-content:center;
         color:white; 
     }
-    .input-area button:hover { background:#ff8a75; }
+    .input-area button:hover { background:#494949; }
   </style>
 
 </head>
@@ -80,8 +99,10 @@ HTML_TEMPLATE = """
       {% endfor %}
     </div>
     <form class="input-area" method="post">
-      <input name="user_input" placeholder="증상이나 요청사항을 입력하세요…" autocomplete="off" required>
-      <button type="submit">전송</button>
+        <input name="user_input" placeholder="증상이나 요청사항을 입력하세요…" autocomplete="off" required>
+        <button type="submit">
+            <svg width="205px" height="205px" viewBox="-4.8 -4.8 33.60 33.60" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 5V19M12 5L6 11M12 5L18 11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+        </button>
     </form>
   </div>
   <script>
@@ -147,7 +168,7 @@ def chat():
             messages.append({"role":"assistant","content": reply})
 
     # on both GET and POST, render the chat history
-    return render_template_string(HTML_TEMPLATE, messages=messages[1:]) # skip the system prompt
+    return render_template_string(HTML_TEMPLATE, messages=[{"role": "assistant", "content": '증상이나 요청사항을 입력하세요…'}]+messages[1:]) # skip the system prompt
 
 if __name__ == "__main__":
     app.run(debug=True)
