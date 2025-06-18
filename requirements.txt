@@ -1,0 +1,8 @@
+Flask
+openai
+python-dotenv
+SQLAlchemy
+faiss-cpu
+numpy
+requests
+beautifulsoup4
