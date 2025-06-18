@@ -7,3 +7,4 @@ numpy
 requests
 psycopg2-binary
 # pg8000
+gunicorn
