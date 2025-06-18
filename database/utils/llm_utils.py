@@ -6,7 +6,7 @@ import json
 import requests
 from dotenv import load_dotenv
 from requests.exceptions import Timeout, HTTPError, RequestException
-from chunking_prompt import SYSTEM_CHUNK_PROMPT
+from database.utils.chunking_prompt import SYSTEM_CHUNK_PROMPT
 
 # Load your OpenAI API key from .env
 load_dotenv()

@@ -25,8 +25,30 @@ hospital_recommendation/
 │   └── utils/                    # 유틸리티 함수
 │       ├── __init__.py
 │       └── database.py           # 데이터베이스 연결
-├── run_app.py                    # 애플리케이션 실행 파일
-└── README.md
+│
+├── database/                     # 데이터 수집·처리 및 벡터DB 관리
+│   ├── api/
+│   │   ├── hospital_openapi/     # 공공병원 OpenAPI 래퍼
+│   │   │   ├── api_config.py     # API 설정
+│   │   │   ├── api.py            # API 연결
+│   │   │   ├── get_equipment_info_api.py # 장비 정보 api
+│   │   │   ├── get_hospital_grades_batch_info_api.py # 평가등급 정보 API
+│   │   │   ├── get_operating_hours_info_api.py # 운영시간 정보 API
+│   │   │   ├── main.py
+│   │   │   └── retrieve_detail_info_api.py
+│   │   └── naver_api/            # 네이버 블로그 크롤러 & API
+│   │       ├── naver_api.py      # 네이버 블로그 API 연결
+│   │       └── naver_blog_crawler.py # 네이버 블로그 크롤러
+│   │
+│   └── utils/                    # 데이터 전처리 · 임베딩 · LLM 헬퍼
+│       ├── chunking_prompt.py    # LLM 청킹용 시스템 프롬프트
+│       ├── data_utils.py         # JSON→DataFrame, 클렌징 등 헬퍼
+│       ├── db_utils.py           # DB 헬퍼
+│       ├── embedding_utils.py    # 임베딩 래퍼 (MiniLM)
+│       └── llm_utils.py          # llm 연결
+│
+├── run_app.py                    # 전체 앱 실행 파일
+└── README.md                     # 프로젝트 개요 및 실행 방법
 ```
 
 ## 🚀 시작하기

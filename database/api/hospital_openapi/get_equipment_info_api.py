@@ -1,9 +1,9 @@
-from db_utils import get_hospital_ids_fixed
-from api import call_api
-from api_config import ApiService, API_BASE_URLS, API_ENDPOINTS, API_PARAMS
-from data_utils import extract_items_from_response, clean_dataframe
+from database.utils.db_utils import get_hospital_ids_fixed
+from database.api.hospital_openapi.api import call_api
+from database.api.hospital_openapi.api_config import ApiService, API_BASE_URLS, API_ENDPOINTS, API_PARAMS
+from database.utils.data_utils import extract_items_from_response, clean_dataframe
 import pandas as pd
-from db_utils import upload_dataframe_ignore_dups
+from database.utils.db_utils import upload_dataframe_ignore_dups
 import time
 from requests.exceptions import RequestException
 
