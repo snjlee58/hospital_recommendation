@@ -1,4 +1,4 @@
-from db_utils import get_hospital_ids
+from db_utils import get_hospital_ids, get_hospital_ids_fixed
 from api import call_api
 from api_config import ApiService, API_BASE_URLS, API_ENDPOINTS, API_PARAMS
 from data_utils import extract_items_from_response, clean_dataframe
@@ -7,7 +7,8 @@ from db_utils import upload_dataframe_ignore_dups
 import time
 from requests.exceptions import RequestException
 
-ids = get_hospital_ids()
+# ids = get_hospital_ids()
+ids = get_hospital_ids_fixed()
     
 # ---- Step 3: For each hospital, get hospital detail info by id and attach to table
 department_master = []       # Will collect all department codes + names
@@ -16,8 +17,11 @@ hospital_dept_records = []   # Will collect each hospital's dept + count info
 # Get detail information for each hospital using id
 start_idx = 51600
 request_count = 0
-batch_size = 2000
-for id in ids[start_idx:]:
+# batch_size = 2000
+batch_size = 1500  # Limit to 1000 requests for this run
+# for id in ids[start_idx:]:
+
+for id in ids[1500:]:
     ## Log request count
     if request_count >= batch_size:
       break

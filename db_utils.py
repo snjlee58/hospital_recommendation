@@ -29,6 +29,13 @@ def get_hospital_ids():
         hospital_ids = [row[0] for row in result.fetchall()]
     return hospital_ids
 
+def get_hospital_ids_fixed():
+    engine = get_engine()
+    with engine.connect() as connection:
+        result = connection.execute(text("SELECT id FROM hospitals WHERE district_code in ('110001', '110021') and type_code = '31' ORDER BY id;"))
+        hospital_ids = [row[0] for row in result.fetchall()]
+    return hospital_ids
+
 def get_hospital_id_names():
     """
     Returns a list of (hospital_id, hospital_name) tuples,
@@ -57,9 +64,10 @@ def get_hospital_id_names_fixed():
             WHERE
                 district_code = '110001'
                 AND type_code     = '31'
-                AND town          = '논현동'
+                AND town          IN ('논현동', '역삼동', '신사동', '삼성동', '청담동', '대치동')
             ORDER BY id
         """)).fetchall()
+        # done: (110001) 논현동, 역삼동, 신사동, 삼성동, 청담동, 대치동
 
     # each row is (id, name)
     return [(row[0], row[1]) for row in rows]

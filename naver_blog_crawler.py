@@ -91,7 +91,7 @@ if __name__ == "__main__":
     # Only iterate from start_idx up to batch_size items
     start_idx = int(sys.argv[1])
     end_idx   = int(sys.argv[2])
-    id_names = get_hospital_id_names_fixed()
+    id_names = get_hospital_id_names_fixed()[start_idx:end_idx]
     for hosp_id, hosp_name in id_names:
         request_count += 1
     # for hosp_id, hosp_name in id_names[start_idx : start_idx + batch_size]:
@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
         # 1) Search Naver Blog for that hospital name + '후기'
         try:
-            blog_posts = search_naver_blog(f"{hosp_name} 후기")
+            blog_posts = search_naver_blog(f"{hosp_name} 진료 후기")
         except Exception as e:
             print(f"⚠️  검색 API 오류: {e}")
             continue
