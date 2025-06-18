@@ -85,6 +85,33 @@ HTML_TEMPLATE = """
         color:white; 
     }
     .input-area button:hover { background:#494949; }
+
+    /* ─── result “cards” ───────────────────────────────────────── */
+    .result-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .result-card h4 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    .result-card p {
+        margin: 0.25rem 0;
+        font-size: 0.9rem;
+        color: #4b5563;
+    }
+    .result-card a {
+        color: #2563eb;
+        text-decoration: none;
+    }
+    .result-card a:hover {
+        text-decoration: underline;
+    }
   </style>
 </head>
 
@@ -133,21 +160,23 @@ def extract_json_from_reply(reply):
     return None
 
 def format_hospital_results(hospitals):
-    """Convert hospital rows to HTML formatted string, excluding null URLs."""
-    return "<br>\n".join([
-        f"<b>{h['name']}</b><br>{h['address']}<br>☎ {h['tel']}" +
-        (f"<br><a href='{h['url']}' target='_blank'>{h['url']}</a>" if h.get('url') else '')
+    cards = []
+    for h in hospitals:
+        url_link = f"<a href='{h.get('url')}' target='_blank'>{h['url']}</a>" if h.get('url') else ""
+        cards.append(f"""
+          <div class="result-card">
+            <h4>{h['name']}</h4>
+            <p>{h['address']}</p>
+            <p>☎ {h['tel']}</p>
+            <p>{url_link}</p>
+          </div>
+        """)
 
-        for h in hospitals
-    ])
+    return "\n".join(cards)
 
 @app.route("/", methods=["GET", "POST"])
 def chat():
-    global messages
-    if request.method == "GET":
-        # start fresh on a plain page load
-        messages = [SYSTEM_PROMPT]
-    elif request.method == "POST":
+    if request.method == "POST":
         user_input = request.form["user_input"]
         # Show the user bubble
         messages.append({"role": "user", "content": user_input})
