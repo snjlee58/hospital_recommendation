@@ -2,9 +2,8 @@ Flask
 openai
 python-dotenv
 SQLAlchemy
-# faiss-cpu
+faiss-cpu
 numpy
 requests
-beautifulsoup4
 psycopg2-binary
 # pg8000
