@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Python cache directories (all levels)
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+
 # Virtual environment
 venv/
 .env/
