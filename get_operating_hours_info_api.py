@@ -1,12 +1,13 @@
-from db_utils import get_hospital_ids
+from db_utils import get_hospital_ids_fixed
 from api import call_api
 from api_config import ApiService, API_BASE_URLS, API_ENDPOINTS, API_PARAMS
 from data_utils import extract_items_from_response, clean_dataframe
 import pandas as pd
-from db_utils import upload_dataframe
+from db_utils import upload_dataframe, upload_dataframe_ignore_dups
 import time
 
-ids = get_hospital_ids()
+# ids = get_hospital_ids()
+ids = get_hospital_ids_fixed()
     
 # ---- Step 3: For each hospital, get hospital detail info by id and attach to table
 hospital_operating_hours_records = [] 
@@ -14,8 +15,10 @@ hospital_operating_hours_records = []
 # Get detail information for each hospital using id
 start_idx = 37173
 request_count = 0
-batch_size = 5000  
-for id in ids[start_idx:]:
+# batch_size = 5000 
+batch_size = 2980
+# for id in ids[start_idx:]:
+for id in ids:
     ## Log request count
     if request_count >= batch_size:
       break
@@ -78,7 +81,8 @@ for id in ids[start_idx:]:
 # ---- Step 4: Upload data to database
 if hospital_operating_hours_records:
     combined_operating_hrs_df = pd.concat(hospital_operating_hours_records).reset_index(drop=True)
-    upload_dataframe(combined_operating_hrs_df, table_name="hospital_operating_hours")
+    # upload_dataframe(combined_operating_hrs_df, table_name="hospital_operating_hours")
+    upload_dataframe_ignore_dups(combined_operating_hrs_df, table_name="hospital_operating_hours", pk=["hospital_id"])
 
 
 
