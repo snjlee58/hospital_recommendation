@@ -4,7 +4,7 @@ Web routes for hospital recommendation service
 import re
 import json
 import requests
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template_string, redirect
 from app.ai.prompt_manager import PromptManager
 from app.ai.openai_client import OpenAIClient
 from app.core.hospital_search import HospitalSearchEngine
@@ -30,6 +30,11 @@ class HospitalRecommendationApp:
     def setup_routes(self):
         """Setup Flask routes"""
         self.app.route("/", methods=["GET", "POST"])(self.chat)
+        self.app.route("/reset", methods=["POST"])(self.reset)
+
+    def reset(self):
+        self.messages = [PromptManager.get_system_prompt()]
+        return redirect("/")
     
     def call_openai_api(self, user_input: str) -> str:
         """
