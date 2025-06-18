@@ -59,3 +59,4 @@ config.local.py
 # Mac/Linux system junk
 *.swp
 *~
+.vercel
