@@ -54,6 +54,7 @@ config.local.py
 *.db
 *.sqlite3
 *.json
+!vercel.json
 
 # Mac/Linux system junk
 *.swp
