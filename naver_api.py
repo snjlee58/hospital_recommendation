@@ -7,7 +7,7 @@ load_dotenv()
 NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET")
 
-def search_naver_blog(query, display=10, start=1):
+def search_naver_blog(query, display=2, start=1):
     url = "https://openapi.naver.com/v1/search/blog"
     headers = {
         "X-Naver-Client-Id": NAVER_CLIENT_ID,

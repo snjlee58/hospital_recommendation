@@ -3,8 +3,8 @@ from requests.exceptions import Timeout, HTTPError, RequestException
 
 # --- Configuration ---
 
-SERVICE_KEY = "GTDvWSPwxWuonrDpSoJFdpfsGL10NYvxqG3hCEwNTdMp39xqNkgVUXR7+ywZsErmVoAtkLW18guG1SgF6Dcnaw==" # old
-# SERVICE_KEY = "Fbq4OmxpKYD/RUVgN0+nZgm02P3BojouPbc4z3JApBzD39BllVOYadxrCb8evD0XHNbQUSSt8nwZanr5Vw7qDQ==" # new
+# SERVICE_KEY = "GTDvWSPwxWuonrDpSoJFdpfsGL10NYvxqG3hCEwNTdMp39xqNkgVUXR7+ywZsErmVoAtkLW18guG1SgF6Dcnaw==" # old
+SERVICE_KEY = "Fbq4OmxpKYD/RUVgN0+nZgm02P3BojouPbc4z3JApBzD39BllVOYadxrCb8evD0XHNbQUSSt8nwZanr5Vw7qDQ==" # new
 
 # --- Helper Function to Make API Call ---
 def call_api(base_url: str, endpoint: str, params: dict, return_json=True):
