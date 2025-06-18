@@ -41,8 +41,6 @@ class HospitalRecommendationApp:
         Returns:
             str: Assistant's reply
         """
-        self.messages.append({"role": "user", "content": user_input})
-        
         data = {
             "model": self.openai_client.model,
             "messages": self.messages
@@ -61,7 +59,6 @@ class HospitalRecommendationApp:
         
         response_json = response.json()
         reply = response_json["choices"][0]["message"]["content"].strip()
-        self.messages.append({"role": "assistant", "content": reply})
         
         return reply
     
@@ -85,21 +82,23 @@ class HospitalRecommendationApp:
     
     def chat(self):
         """Main chat route handler"""
-        reply = ""
-        
         if request.method == "POST":
             user_input = request.form["user_input"]
+            # Show the user bubble
+            self.messages.append({"role": "user", "content": user_input})
+
+            # Call LLM + DB lookup
             reply = self.call_openai_api(user_input)
             data = self.extract_json_from_reply(reply)
 
             if data:
-                city = data.get("city")
-                district = data.get("district")
-                hospital_type = data.get("hospital_type")
-                department = data.get("department_name")
-                print(f"Extracted data: {data}")
-                
-                # Search hospitals
+                # you returned JSON: turn into HTML list or whatever
+                city, district, hospital_type, department = (
+                  data.get("city"), 
+                  data.get("district"),
+                  data.get("hospital_type"), 
+                  data.get("department_name")
+                )
                 hospitals = self.search_engine.search_hospitals(
                     city, district, hospital_type, department
                 )
@@ -118,14 +117,18 @@ class HospitalRecommendationApp:
                     
                     # Format and display results
                     result_text = format_hospital_results(analyzed_hospitals)
-                    return render_template_string(HTML_TEMPLATE, response=result_text)
+                    self.messages.append({"role": "assistant", "content": result_text})
                 else:
-                    return render_template_string(
-                        HTML_TEMPLATE, 
-                        response="검색 결과가 없습니다."
-                    )
+                    self.messages.append({"role": "assistant", "content": "검색 결과가 없습니다."})
+            else:
+                # LLM asked a follow-up
+                self.messages.append({"role":"assistant","content": reply})
 
-        return render_template_string(HTML_TEMPLATE, response=reply)
+        # on both GET and POST, render the chat history
+        return render_template_string(
+            HTML_TEMPLATE, 
+            messages=[{"role": "assistant", "content": '증상이나 요청사항을 입력하세요…'}]+self.messages[1:]
+        ) # skip the system prompt
     
     def run(self, debug: bool = True, host: str = "0.0.0.0", port: int = 5000):
         """
