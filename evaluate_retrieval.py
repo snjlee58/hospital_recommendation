@@ -74,3 +74,38 @@ def compute_metrics(true_hospital, results, k=5):
     return {
         'recall@{}'.format(k): recall_at_k
     }
+
+def evaluate_search_engine(n=50, k=3):
+    samples = fetch_review_samples(n)
+    recall_hits = 0
+    reciprocal_ranks = []
+
+    for _, row in samples.iterrows():
+        query = generate_user_query(row["summary"])
+        results = run_search(query)
+        hospital_id_gt = row["hospital_id"]
+
+        # Extract predicted hospital IDs
+        predicted_ids = [res['hospital_id'] for res in results]
+
+        # Recall@k
+        if hospital_id_gt in predicted_ids[:k]:
+            recall_hits += 1
+
+        # MRR
+        try:
+            rank = predicted_ids.index(hospital_id_gt) + 1
+            reciprocal_ranks.append(1 / rank)
+        except ValueError:
+            reciprocal_ranks.append(0.0)  # hospital not in result
+
+    recall_at_k = recall_hits / n
+    mrr = sum(reciprocal_ranks) / n
+
+    return {
+        f"Recall@{k}": recall_at_k,
+        "MRR": mrr
+    }
+
+metrics = evaluate_search_engine(n=50, k=3)
+print(metrics)
